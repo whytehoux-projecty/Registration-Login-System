@@ -51,6 +51,11 @@ const SystemSchedulePage = React.lazy(() =>
     default: m.default,
   }))
 );
+const WaitlistPage = React.lazy(() =>
+  import("./pages/waitlist/WaitlistPage").then((m) => ({
+    default: m.default,
+  }))
+);
 
 
 const InvitationPageMI = React.lazy(() =>
@@ -136,6 +141,7 @@ function App() {
             <Route path="/system-schedule" element={<SystemSchedulePage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/waitlist" element={<WaitlistPage />} />
           </Route>
 
           {/* Membership Initiation Routes - Public */}

@@ -96,3 +96,96 @@ async def upload_audio(file: UploadFile = File(...)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to upload audio: {str(e)}"
         )
+
+
+@router.get("/list")
+async def list_uploads(media_type: str = "all"):
+    """
+    List all uploaded files (Admin only).
+    media_type can be 'photos', 'audio', or 'all'
+    """
+    try:
+        files = []
+        
+        if media_type in ["photos", "all"]:
+            if os.path.exists(PHOTO_DIR):
+                for filename in os.listdir(PHOTO_DIR):
+                    filepath = os.path.join(PHOTO_DIR, filename)
+                    if os.path.isfile(filepath):
+                        stat = os.stat(filepath)
+                        files.append({
+                            "id": filename,
+                            "type": "photo",
+                            "filename": filename,
+                            "url": f"/uploads/photos/{filename}",
+                            "size_bytes": stat.st_size,
+                            "created_at": stat.st_mtime
+                        })
+        
+        if media_type in ["audio", "all"]:
+            if os.path.exists(AUDIO_DIR):
+                for filename in os.listdir(AUDIO_DIR):
+                    filepath = os.path.join(AUDIO_DIR, filename)
+                    if os.path.isfile(filepath):
+                        stat = os.stat(filepath)
+                        files.append({
+                            "id": filename,
+                            "type": "audio",
+                            "filename": filename,
+                            "url": f"/uploads/audio/{filename}",
+                            "size_bytes": stat.st_size,
+                            "created_at": stat.st_mtime
+                        })
+        
+        # Sort by created time, newest first
+        files.sort(key=lambda x: x["created_at"], reverse=True)
+        
+        return {
+            "success": True,
+            "count": len(files),
+            "files": files
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list uploads: {str(e)}"
+        )
+
+
+@router.delete("/{media_type}/{file_id}")
+async def delete_upload(media_type: str, file_id: str):
+    """
+    Delete an uploaded file (Admin only).
+    """
+    try:
+        if media_type == "photos":
+            file_path = os.path.join(PHOTO_DIR, file_id)
+        elif media_type == "audio":
+            file_path = os.path.join(AUDIO_DIR, file_id)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid media type. Use 'photos' or 'audio'"
+            )
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="File not found"
+            )
+        
+        os.remove(file_path)
+        
+        return {
+            "success": True,
+            "message": f"File {file_id} deleted successfully"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete file: {str(e)}"
+        )

@@ -25,4 +25,5 @@ export const STORAGE_KEYS = {
   USER_AUTH_KEY: "user_auth_key",
   USER_INFO: "user_info",
   ONBOARDING_COMPLETE: "onboarding_complete",
+  SCAN_HISTORY: "scan_history",
 } as const;

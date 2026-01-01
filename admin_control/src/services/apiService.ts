@@ -167,6 +167,45 @@ export interface UserStats {
   first_login?: string
 }
 
+// Waitlist Types
+export interface WaitlistRequest {
+  id: number
+  full_name: string
+  email: string
+  phone?: string
+  company?: string
+  role?: string
+  status: 'pending' | 'approved' | 'invited' | 'rejected'
+  reviewed_by?: string
+  admin_notes?: string
+  rejection_reason?: string
+  invitation_id?: string
+  created_at: string
+  updated_at?: string
+}
+
+export interface WaitlistStats {
+  total: number
+  pending: number
+  approved: number
+  invited: number
+  rejected: number
+}
+
+export interface WaitlistApproveRequest {
+  admin_notes?: string
+  expires_in_hours?: number
+}
+
+export interface WaitlistApprovalResponse {
+  success: boolean
+  request_id: number
+  invitation_code: string
+  pin: string
+  expires_at?: string
+  message: string
+}
+
 
 class ApiService {
   private instance: AxiosInstance
@@ -442,6 +481,58 @@ class ApiService {
     },
   }
 
+  // Waitlist Management (Admin only)
+  waitlist = {
+    getPending: async (skip = 0, limit = 50): Promise<WaitlistRequest[]> => {
+      return await this.get<WaitlistRequest[]>(`/api/waitlist/pending?skip=${skip}&limit=${limit}`)
+    },
+
+    getAll: async (status?: string, skip = 0, limit = 50): Promise<WaitlistRequest[]> => {
+      const params = new URLSearchParams()
+      if (status) params.append('status', status)
+      params.append('skip', skip.toString())
+      params.append('limit', limit.toString())
+      return await this.get<WaitlistRequest[]>(`/api/waitlist/all?${params}`)
+    },
+
+    getStats: async (): Promise<WaitlistStats> => {
+      return await this.get<WaitlistStats>('/api/waitlist/stats')
+    },
+
+    getDetails: async (requestId: number): Promise<WaitlistRequest> => {
+      return await this.get<WaitlistRequest>(`/api/waitlist/${requestId}`)
+    },
+
+    approve: async (requestId: number, data?: WaitlistApproveRequest): Promise<WaitlistApprovalResponse> => {
+      return await this.post<WaitlistApprovalResponse>(`/api/waitlist/${requestId}/approve`, data || {})
+    },
+
+    reject: async (requestId: number, reason: string): Promise<{ success: boolean; message: string }> => {
+      return await this.post(`/api/waitlist/${requestId}/reject`, { reason })
+    },
+  }
+
+  // Media Management
+  media = {
+    list: async (mediaType: 'all' | 'photos' | 'audio' = 'all'): Promise<{
+      success: boolean
+      count: number
+      files: Array<{
+        id: string
+        type: 'photo' | 'audio'
+        filename: string
+        url: string
+        size_bytes: number
+        created_at: number
+      }>
+    }> => {
+      return await this.get(`/api/upload/list?media_type=${mediaType}`)
+    },
+
+    delete: async (mediaType: 'photos' | 'audio', fileId: string): Promise<{ success: boolean; message: string }> => {
+      return await this.apiDelete(`/api/upload/${mediaType}/${fileId}`)
+    },
+  }
 
   // Getters
   get isAuthenticated(): boolean {

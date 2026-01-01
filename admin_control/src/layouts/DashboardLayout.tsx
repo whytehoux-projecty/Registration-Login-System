@@ -13,16 +13,20 @@ import {
   X,
   Sun,
   Moon,
-  Link2
+  Link2,
+  Activity,
+  ClipboardList
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Members', href: '/members', icon: Users },
+  { name: 'Waitlist', href: '/waitlist', icon: ClipboardList },
   { name: 'Invitations', href: '/invitations', icon: Mail },
   { name: 'Services', href: '/services', icon: Link2 },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Media', href: '/media', icon: FolderOpen },
+  { name: 'System Status', href: '/system-schedule', icon: Activity },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
