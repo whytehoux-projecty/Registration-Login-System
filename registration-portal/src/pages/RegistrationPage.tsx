@@ -2,13 +2,16 @@
  * Registration Page - Multi-step registration form
  * Connected to Central Auth API backend
  * Theme: Light grey (#d9d9d9) with Chaco Black (#28282B)
+ * 
+ * SECURITY: This page is protected by useRegistrationGuard hook.
+ * Users will be redirected to InterestPage if MIS is offline.
  */
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { api } from '../services/api';
-import { useRegistrationForm, usePhotoUpload, useRegistrationSession } from '../hooks';
+import { useRegistrationForm, usePhotoUpload, useRegistrationSession, useRegistrationGuard } from '../hooks';
 import LogoIcon from '../assets/page2-assets/logoicon.png';
 
 const STEP_TITLES = ['Personal Info', 'Address', 'Credentials', 'Photos'];
@@ -17,6 +20,9 @@ export const RegistrationPage: React.FC = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+
+    // Registration guard - protects page from offline access
+    const { isRedirecting, statusMessage } = useRegistrationGuard(navigate);
 
     // Hooks
     const { formData, updateField, errors, isValid } = useRegistrationForm();
@@ -134,6 +140,29 @@ export const RegistrationPage: React.FC = () => {
         return 'text-[#28282B]';
     };
 
+    // Show redirecting screen if system is offline
+    if (isRedirecting) {
+        return (
+            <div className="min-h-screen bg-[#d9d9d9] flex items-center justify-center p-4">
+                <div className="max-w-md w-full text-center">
+                    <div className="bg-white p-8 border-4 border-[#28282B]">
+                        <div className="w-16 h-16 bg-amber-100 flex items-center justify-center mx-auto mb-6">
+                            <svg className="w-8 h-8 text-amber-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                        </div>
+                        <h1 className="text-2xl font-bold text-[#28282B] mb-4 uppercase font-['boxing']">
+                            Registration Offline
+                        </h1>
+                        <p className="text-gray-600 mb-2">{statusMessage}</p>
+                        <p className="text-gray-500 text-sm">Redirecting to Interest page...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-[#d9d9d9] py-8 px-4">
             <div className="max-w-2xl mx-auto">
@@ -202,7 +231,7 @@ export const RegistrationPage: React.FC = () => {
                     {/* Step 1: Personal Info */}
                     {step === 1 && (
                         <div className="space-y-6">
-                            <h2 className="text-2xl font-bold text-[#28282B] mb-6 uppercase" style={{ fontFamily: "'boxing', sans-serif" }}>Personal Information</h2>
+                            <h2 className="text-2xl font-bold text-[#28282B] mb-6 uppercase font-['boxing']">Personal Information</h2>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -304,7 +333,7 @@ export const RegistrationPage: React.FC = () => {
                     {/* Step 2: Address */}
                     {step === 2 && (
                         <div className="space-y-6">
-                            <h2 className="text-2xl font-bold text-[#28282B] mb-6 uppercase" style={{ fontFamily: "'boxing', sans-serif" }}>Address Information</h2>
+                            <h2 className="text-2xl font-bold text-[#28282B] mb-6 uppercase font-['boxing']">Address Information</h2>
 
                             <div>
                                 <label className="block text-sm font-medium text-[#28282B] mb-2">
@@ -391,7 +420,7 @@ export const RegistrationPage: React.FC = () => {
                     {/* Step 3: Credentials */}
                     {step === 3 && (
                         <div className="space-y-6">
-                            <h2 className="text-2xl font-bold text-[#28282B] mb-6 uppercase" style={{ fontFamily: "'boxing', sans-serif" }}>Account Credentials</h2>
+                            <h2 className="text-2xl font-bold text-[#28282B] mb-6 uppercase font-['boxing']">Account Credentials</h2>
                             <p className="text-gray-600 mb-4">
                                 Create your login credentials. These will be used to access your account once approved.
                             </p>
@@ -469,7 +498,7 @@ export const RegistrationPage: React.FC = () => {
                     {/* Step 4: Photos */}
                     {step === 4 && (
                         <div className="space-y-6">
-                            <h2 className="text-2xl font-bold text-[#28282B] mb-6 uppercase" style={{ fontFamily: "'boxing', sans-serif" }}>Upload Photos</h2>
+                            <h2 className="text-2xl font-bold text-[#28282B] mb-6 uppercase font-['boxing']">Upload Photos</h2>
                             <p className="text-gray-600 mb-4">
                                 Please upload 1-5 clear photos of yourself. These will be used for identification.
                             </p>
@@ -501,10 +530,7 @@ export const RegistrationPage: React.FC = () => {
                             {/* Upload progress */}
                             {isUploading && (
                                 <div className="w-full bg-gray-200 h-2">
-                                    <div
-                                        className="bg-[#28282B] h-2 transition-all"
-                                        style={{ width: `${uploadProgress}%` }}
-                                    />
+                                    <div className={`bg-[#28282B] h-2 transition-all w-[${uploadProgress}%]`} />
                                 </div>
                             )}
 

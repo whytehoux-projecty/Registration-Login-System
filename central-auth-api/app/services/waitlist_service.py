@@ -15,7 +15,7 @@ from app.models.waitlist import WaitlistRequest, WaitlistStatus
 from app.services import invitation_service, notification_service
 
 
-def submit_interest(
+async def submit_interest(
     db: Session,
     full_name: str,
     email: str,
@@ -68,7 +68,7 @@ def submit_interest(
     db.refresh(waitlist_request)
     
     # Notify admin about new request
-    notification_service.send_admin_notification(
+    await notification_service.send_admin_notification(
         subject="New Waitlist Request",
         message=f"""
 A new user has submitted an interest request:
@@ -130,7 +130,7 @@ def get_request_by_email(db: Session, email: str) -> Optional[WaitlistRequest]:
     ).first()
 
 
-def approve_request(
+async def approve_request(
     db: Session,
     request_id: int,
     admin_username: str,
@@ -184,7 +184,7 @@ def approve_request(
     db.commit()
     
     # Send invitation email to user
-    send_invitation_notification(
+    await send_invitation_notification(
         email=waitlist_request.email,
         full_name=waitlist_request.full_name,
         phone=waitlist_request.phone,
@@ -203,7 +203,7 @@ def approve_request(
     }
 
 
-def reject_request(
+async def reject_request(
     db: Session,
     request_id: int,
     admin_username: str,
@@ -237,7 +237,7 @@ def reject_request(
     db.commit()
     
     # Optionally notify user of rejection
-    send_rejection_notification(
+    await send_rejection_notification(
         email=waitlist_request.email,
         full_name=waitlist_request.full_name,
         reason=reason
@@ -246,7 +246,7 @@ def reject_request(
     return True
 
 
-def send_invitation_notification(
+async def send_invitation_notification(
     email: str,
     full_name: str,
     phone: Optional[str],
@@ -292,7 +292,7 @@ The SPACE Team
     """
     
     # Send email
-    success = notification_service.send_user_notification(email, subject, message)
+    success = await notification_service.send_user_notification(email, subject, message)
     
     # TODO: Implement SMS notification if phone provided
     # if phone:
@@ -301,7 +301,7 @@ The SPACE Team
     return success
 
 
-def send_rejection_notification(
+async def send_rejection_notification(
     email: str,
     full_name: str,
     reason: str
@@ -327,7 +327,7 @@ Best regards,
 The SPACE Team
     """
     
-    return notification_service.send_user_notification(email, subject, message)
+    return await notification_service.send_user_notification(email, subject, message)
 
 
 def get_waitlist_stats(db: Session) -> dict:

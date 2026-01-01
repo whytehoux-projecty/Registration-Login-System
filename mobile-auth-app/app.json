@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Central Auth",
+    "slug": "central-auth-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.centralauth.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Central Auth uses the camera to scan QR codes for secure authentication."
+      }
+    },
+    "android": {
+      "package": "com.centralauth.mobile",
+      "permissions": [
+        "CAMERA",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Central Auth to access your camera for QR code scanning."
+        }
+      ]
+    ],
+    "scheme": "centralauth"
+  }
+}

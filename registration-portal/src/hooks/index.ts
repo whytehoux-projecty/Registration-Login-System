@@ -474,12 +474,19 @@ export function useAudioRecording(): UseAudioRecordingReturn {
 
 // ============================================================================
 // useSystemStatus Hook
+// 
+// NOTE: InterestPage and InvitationPage now implement their own inline
+// status checks for more granular control over UI presentation. This hook
+// is still useful for simpler status checks in other components.
 // ============================================================================
 
 interface UseSystemStatusReturn {
     status: SystemStatus | null;
     isLoading: boolean;
     isOpen: boolean;
+    isOffline: boolean;
+    isClosingSoon: boolean;
+    minutesUntilClose: number | undefined;
     error: string | null;
     refresh: () => Promise<void>;
 }
@@ -506,18 +513,84 @@ export function useSystemStatus(): UseSystemStatusReturn {
 
     useEffect(() => {
         fetchStatus();
+
+        // WebSocket Integration
+        const API_BASE_URL = (import.meta as unknown as { env: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8000';
+        const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss' : 'ws';
+        // Handle trailing slash if present
+        const baseUrl = API_BASE_URL.replace(/\/$/, '');
+        const wsUrl = baseUrl.replace(/^http/, wsProtocol) + '/api/system/ws';
+
+        let socket: WebSocket | null = null;
+        let reconnectTimeout: ReturnType<typeof setTimeout>;
+        let isMounted = true;
+
+        const connect = () => {
+            if (!isMounted) return;
+
+            try {
+                socket = new WebSocket(wsUrl);
+
+                socket.onopen = () => {
+                    console.log("[WS] Connected to System Status");
+                };
+
+                socket.onmessage = (event) => {
+                    if (!isMounted) return;
+                    try {
+                        const newStatus = JSON.parse(event.data);
+                        setStatus(newStatus);
+                        setIsLoading(false);
+                        // Clear any previous error
+                        setError(null);
+                    } catch (e) {
+                        console.error("[WS] Parse error", e);
+                    }
+                };
+
+                socket.onclose = () => {
+                    if (isMounted) {
+                        // Try to reconnect after delay
+                        reconnectTimeout = setTimeout(connect, 3000);
+                    }
+                };
+            } catch (err) {
+                console.error("[WS] Connection error", err);
+                if (isMounted) {
+                    reconnectTimeout = setTimeout(connect, 5000);
+                }
+            }
+        };
+
+        connect();
+
+        return () => {
+            isMounted = false;
+            if (socket) {
+                socket.onclose = null; // Prevent reconnect loop
+                socket.close();
+            }
+            if (reconnectTimeout) clearTimeout(reconnectTimeout);
+        };
     }, [fetchStatus]);
 
     const isOpen = status?.status === 'open' || status?.status === 'limited';
+    const isOffline = status?.status === 'closed';
+    const isClosingSoon = isOpen && (status?.warning ?? false);
+    const minutesUntilClose = status?.minutes_until_close;
 
     return {
         status,
         isLoading,
         isOpen,
+        isOffline,
+        isClosingSoon,
+        minutesUntilClose,
         error,
         refresh: fetchStatus,
     };
 }
+
 
 // ============================================================================
 // usePolicyAcceptance Hook
@@ -558,5 +631,83 @@ export function usePolicyAcceptance(): UsePolicyAcceptanceReturn {
         togglePolicy,
         allAccepted,
         reset,
+    };
+}
+
+// ============================================================================
+// useRegistrationGuard Hook
+// 
+// Protects registration pages from access when MIS is offline.
+// Automatically redirects to InterestPage with a toast notification.
+// Use this in RegistrationPage and OathPage.
+// ============================================================================
+
+interface UseRegistrationGuardReturn {
+    isOnline: boolean;
+    isOffline: boolean;
+    isLoading: boolean;
+    isRedirecting: boolean;
+    statusMessage: string;
+}
+
+export function useRegistrationGuard(navigate: (path: string, options?: { replace?: boolean }) => void): UseRegistrationGuardReturn {
+    const [status, setStatus] = useState<'open' | 'closed' | 'unknown'>('unknown');
+    const [statusMessage, setStatusMessage] = useState('Checking system status...');
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRedirecting, setIsRedirecting] = useState(false);
+    const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                const result = await api.getSystemStatus();
+                if (result.success && result.data) {
+                    const currentStatus = result.data.status as 'open' | 'closed';
+                    setStatus(currentStatus);
+                    setStatusMessage(result.data.message);
+
+                    // Redirect if system is closed
+                    if (currentStatus === 'closed' && !isRedirecting) {
+                        setIsRedirecting(true);
+
+                        // Import toast dynamically to avoid circular deps
+                        const { toast } = await import('react-toastify');
+                        toast.warning('Registration is currently offline. Redirecting to Interest page...');
+
+                        redirectTimeoutRef.current = setTimeout(() => {
+                            navigate('/interest', { replace: true });
+                        }, 2000);
+                    }
+                } else {
+                    setStatus('unknown');
+                    setStatusMessage('Unable to determine system status');
+                }
+            } catch {
+                setStatus('unknown');
+                setStatusMessage('Connection error');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkStatus();
+
+        // Poll every 30 seconds
+        const interval = setInterval(checkStatus, 30000);
+
+        return () => {
+            clearInterval(interval);
+            if (redirectTimeoutRef.current) {
+                clearTimeout(redirectTimeoutRef.current);
+            }
+        };
+    }, [navigate, isRedirecting]);
+
+    return {
+        isOnline: status === 'open',
+        isOffline: status === 'closed',
+        isLoading,
+        isRedirecting,
+        statusMessage,
     };
 }

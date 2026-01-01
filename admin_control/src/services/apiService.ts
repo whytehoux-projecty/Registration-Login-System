@@ -95,6 +95,9 @@ export interface SystemStatus {
   message: string
   warning: boolean
   current_time?: string
+  is_manual_override?: boolean
+  override_reason?: string
+  override_expires_at?: string
 }
 
 export interface OperatingHours {
@@ -103,6 +106,49 @@ export interface OperatingHours {
   warning_minutes_before_close: number
   timezone: string
   currently_open: boolean
+  is_manually_overridden?: boolean
+  manual_status?: string
+  override_reason?: string
+  override_expires_at?: string
+}
+
+export interface ScheduleUpdate {
+  opening_hour: number
+  opening_minute: number
+  closing_hour: number
+  closing_minute: number
+  warning_minutes: number
+  timezone: string
+}
+
+export interface SystemToggle {
+  status: 'open' | 'closed' | 'auto'
+  reason?: string
+  duration_minutes?: number
+}
+
+export interface ScheduleResponse {
+  id: number
+  opening_time: string
+  closing_time: string
+  warning_minutes_before_close: number
+  timezone: string
+  is_manually_overridden: boolean
+  manual_status?: string
+  override_reason?: string
+  override_expires_at?: string
+  updated_at?: string
+  updated_by?: number
+}
+
+export interface ScheduleAuditLog {
+  id: number
+  admin_id: number
+  action: string
+  old_value?: string
+  new_value?: string
+  reason?: string
+  timestamp: string
 }
 
 export interface LoginHistory {
@@ -119,6 +165,8 @@ export interface UserStats {
   services_used: number
   last_login?: string
   first_login?: string
+}
+first_login ?: string
 }
 
 class ApiService {
@@ -374,7 +422,27 @@ class ApiService {
     }> => {
       return await this.get('/health')
     },
+
+    // Schedule Management (Admin only)
+    updateOperatingHours: async (schedule: ScheduleUpdate): Promise<ScheduleResponse> => {
+      return await this.put<ScheduleResponse>('/api/admin/system/operating-hours', schedule)
+    },
+
+    toggleSystemStatus: async (toggle: SystemToggle): Promise<ScheduleResponse> => {
+      return await this.post<ScheduleResponse>('/api/admin/system/toggle', toggle)
+    },
+
+    getCurrentSchedule: async (): Promise<ScheduleResponse> => {
+      return await this.get<ScheduleResponse>('/api/admin/system/schedule')
+    },
+
+    getScheduleAuditLog: async (skip = 0, limit = 50): Promise<ScheduleAuditLog[]> => {
+      return await this.get<ScheduleAuditLog[]>(
+        `/api/admin/system/audit-log?skip=${skip}&limit=${limit}`
+      )
+    },
   }
+
 
   // Getters
   get isAuthenticated(): boolean {

@@ -4,13 +4,14 @@
 # ============================================================================ 
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
 from app.core.system_status import get_system_status
 
 # Import all route modules
-from app.routes import registration, admin, auth, services, system, invitation, waitlist
+from app.routes import registration, admin, auth, services, system, invitation, waitlist, upload
 
 # Import all models to ensure they're registered with SQLAlchemy
 from app.models import waitlist as waitlist_model  # noqa: F401
@@ -56,6 +57,14 @@ app.add_middleware(
     expose_headers=["X-Total-Count"],
 )
 
+# Mount uploads directory to serve images/audio
+# Ensure the directory exists to avoid startup errors
+import os
+if not os.path.exists("uploads"):
+    os.makedirs("uploads")
+    
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 # Register all route modules with their prefixes
 app.include_router(
     registration.router,
@@ -97,6 +106,12 @@ app.include_router(
     waitlist.router,
     prefix="/api/waitlist",
     tags=["Waitlist"]
+)
+
+app.include_router(
+    upload.router,
+    prefix="/api/upload",
+    tags=["Uploads"]
 )
 
 # Startup event - runs when server starts

@@ -134,7 +134,12 @@ export interface ApiError {
 export interface SystemStatus {
     status: 'open' | 'closed' | 'limited';
     message: string;
+    warning?: boolean;
+    minutes_until_close?: number;
     current_time?: string;
+    is_manual_override?: boolean;
+    override_reason?: string;
+    override_expires_at?: string;
     operating_hours?: {
         start: string;
         end: string;

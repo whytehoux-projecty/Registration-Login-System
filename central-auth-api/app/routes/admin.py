@@ -9,6 +9,7 @@ from app.models.active_user import ActiveUser
 from app.core.security import create_access_token
 from app.core.dependencies import get_current_admin
 from app.models.admin import Admin
+from app.core.websocket_manager import manager
 
 router = APIRouter()
 
@@ -70,7 +71,7 @@ def get_pending_users(
         )
 
 @router.post("/approve/{user_id}", response_model=UserResponse)
-def approve_user(
+async def approve_user(
     user_id: int,
     approval: ApprovalRequest,
     db: Session = Depends(get_db),
@@ -89,7 +90,7 @@ def approve_user(
         )
         
         # Send approval notification to user
-        notification_service.notify_user_approval(
+        await notification_service.notify_user_approval(
             email=active_user.email,
             username=active_user.username
         )
@@ -197,3 +198,171 @@ def get_all_users(
     """
     users = db.query(ActiveUser).offset(skip).limit(limit).all()
     return users
+
+
+# ============================================================================
+# SYSTEM SCHEDULE MANAGEMENT ENDPOINTS
+# ============================================================================
+
+from app.services import schedule_service
+from app.schemas.schedule import (
+    OperatingHoursUpdate, 
+    SystemToggleRequest, 
+    ScheduleResponse,
+    ScheduleAuditResponse
+)
+
+
+@router.put("/system/operating-hours", response_model=ScheduleResponse)
+async def update_operating_hours(
+    schedule_update: OperatingHoursUpdate,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """
+    Update system operating hours
+    
+    Requires admin authentication
+    Only super admins can modify system schedule
+    All changes are logged in audit trail
+    """
+    # Check if user is super admin
+    if not current_admin.is_super_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only super admins can modify system operating hours"
+        )
+    
+    try:
+        updated_schedule = schedule_service.update_operating_hours(
+            db=db,
+            opening_hour=schedule_update.opening_hour,
+            opening_minute=schedule_update.opening_minute,
+            closing_hour=schedule_update.closing_hour,
+            closing_minute=schedule_update.closing_minute,
+            warning_minutes=schedule_update.warning_minutes,
+            admin_id=current_admin.id,
+            timezone=schedule_update.timezone
+        )
+        
+        # Broadcast new status to all connected clients
+        await manager.broadcast(schedule_service.get_system_status(db))
+        
+        return ScheduleResponse(**updated_schedule.to_dict())
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update operating hours: {str(e)}"
+        )
+
+
+@router.post("/system/toggle", response_model=ScheduleResponse)
+async def toggle_system_status(
+    toggle_request: SystemToggleRequest,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """
+    Manually override system status
+    
+    Allows super admins to:
+    - Force system 'open' regardless of scheduled hours
+    - Force system 'closed' regardless of scheduled hours
+    - Return to 'auto' (scheduled) operation
+    
+    Optional duration can be set for temporary overrides
+    """
+    # Check if user is super admin
+    if not current_admin.is_super_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only super admins can manually toggle system status"
+        )
+    
+    try:
+        if toggle_request.status == 'auto':
+            # Clear manual override
+            updated_schedule = schedule_service.clear_manual_override(
+                db=db,
+                admin_id=current_admin.id
+            )
+        else:
+            # Set manual override
+            updated_schedule = schedule_service.set_manual_override(
+                db=db,
+                status=toggle_request.status,
+                admin_id=current_admin.id,
+                reason=toggle_request.reason,
+                duration_minutes=toggle_request.duration_minutes
+            )
+        
+
+        
+        # Broadcast new status to all connected clients
+        await manager.broadcast(schedule_service.get_system_status(db))
+        
+        return ScheduleResponse(**updated_schedule.to_dict())
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to toggle system status: {str(e)}"
+        )
+
+
+@router.get("/system/schedule", response_model=ScheduleResponse)
+def get_current_schedule(
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """
+    Get current system schedule configuration
+    
+    Returns complete schedule including any active manual overrides
+    """
+    try:
+        schedule = schedule_service.get_current_schedule(db)
+        return ScheduleResponse(**schedule.to_dict())
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve schedule: {str(e)}"
+        )
+
+
+@router.get("/system/audit-log", response_model=List[ScheduleAuditResponse])
+def get_schedule_audit_log(
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """
+    Get audit log of system schedule changes
+    
+    Shows history of all schedule modifications and manual overrides
+    Requires admin authentication
+    """
+    try:
+        logs = schedule_service.get_schedule_audit_log(
+            db=db,
+            limit=limit,
+            skip=skip
+        )
+        return logs
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve audit log: {str(e)}"
+        )

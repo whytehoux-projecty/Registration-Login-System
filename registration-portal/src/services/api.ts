@@ -352,20 +352,11 @@ export const api = {
                 },
             };
 
-            // TODO: Implement file upload endpoint on backend
-            // const response = await apiClient.post('/api/upload/photo', formData, uploadConfig);
-            void uploadConfig; // Config prepared for when backend endpoint is ready
-
-            // Simulate upload for now
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            const response = await apiClient.post<UploadResponse>('/api/upload/photo', formData, uploadConfig);
 
             return {
                 success: true,
-                data: {
-                    success: true,
-                    file_id: `photo_${Date.now()}`,
-                    url: URL.createObjectURL(file),
-                },
+                data: response.data,
             };
         } catch (error) {
             return handleApiError(error);
@@ -387,21 +378,13 @@ export const api = {
                 formData.append('user_id', userId.toString());
             }
 
-            // TODO: Implement audio upload endpoint
-            // const response = await apiClient.post('/api/upload/audio', formData, {
-            //     headers: { 'Content-Type': 'multipart/form-data' },
-            // });
-
-            // Simulate upload
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const response = await apiClient.post<UploadResponse>('/api/upload/audio', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
 
             return {
                 success: true,
-                data: {
-                    success: true,
-                    file_id: `oath_${Date.now()}`,
-                    url: URL.createObjectURL(audioBlob),
-                },
+                data: response.data,
             };
         } catch (error) {
             return handleApiError(error);

@@ -2,13 +2,16 @@
  * Oath Page - Record membership oath
  * Connected to Central Auth API backend
  * Theme: Light grey (#d9d9d9) with Chaco Black (#28282B)
+ * 
+ * SECURITY: This page is protected by useRegistrationGuard hook.
+ * Users will be redirected to InterestPage if MIS is offline.
  */
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { api } from '../services/api';
-import { useAudioRecording, usePolicyAcceptance, useRegistrationSession, useRegistrationForm } from '../hooks';
+import { useAudioRecording, usePolicyAcceptance, useRegistrationSession, useRegistrationForm, useRegistrationGuard } from '../hooks';
 import LogoIcon from '../assets/page2-assets/logoicon.png';
 
 const OATH_TEXT = `I solemnly declare that I will uphold the values and principles of this organization. 
@@ -24,6 +27,9 @@ const POLICIES = [
 
 export const OathPage: React.FC = () => {
     const navigate = useNavigate();
+
+    // Registration guard - protects page from offline access
+    const { isRedirecting, statusMessage } = useRegistrationGuard(navigate);
 
     // Hooks
     const {
@@ -163,6 +169,29 @@ export const OathPage: React.FC = () => {
         return 'text-[#28282B]';
     };
 
+    // Show redirecting screen if system is offline
+    if (isRedirecting) {
+        return (
+            <div className="min-h-screen bg-[#d9d9d9] flex items-center justify-center p-4">
+                <div className="max-w-md w-full text-center">
+                    <div className="bg-white p-8 border-4 border-[#28282B]">
+                        <div className="w-16 h-16 bg-amber-100 flex items-center justify-center mx-auto mb-6">
+                            <svg className="w-8 h-8 text-amber-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                        </div>
+                        <h1 className="text-2xl font-bold text-[#28282B] mb-4 uppercase font-['boxing']">
+                            Registration Offline
+                        </h1>
+                        <p className="text-gray-600 mb-2">{statusMessage}</p>
+                        <p className="text-gray-500 text-sm">Redirecting to Interest page...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-[#d9d9d9] py-8 px-4">
             <div className="max-w-2xl mx-auto">
@@ -193,7 +222,7 @@ export const OathPage: React.FC = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
                     </div>
-                    <h1 className="text-3xl font-bold text-[#28282B] mb-2 uppercase" style={{ fontFamily: "'boxing', sans-serif", letterSpacing: '0.1em' }}>Membership Oath</h1>
+                    <h1 className="text-3xl font-bold text-[#28282B] mb-2 uppercase font-['boxing'] tracking-[0.1em]">Membership Oath</h1>
                     <p className="text-gray-600">Record yourself reading the oath below</p>
                 </div>
 
@@ -254,11 +283,7 @@ export const OathPage: React.FC = () => {
                                         {[1, 2, 3, 4, 5].map((i) => (
                                             <div
                                                 key={i}
-                                                className={`w-1 bg-red-500 animate-pulse`}
-                                                style={{
-                                                    height: `${10 + Math.random() * 20}px`,
-                                                    animationDelay: `${i * 0.1}s`
-                                                }}
+                                                className={`w-1 bg-red-500 animate-pulse audio-bar-delay-${i} h-[${10 + Math.random() * 20}px]`}
                                             />
                                         ))}
                                     </div>
@@ -376,10 +401,7 @@ export const OathPage: React.FC = () => {
                         </div>
                         <div className="w-full bg-gray-200 h-2 mt-2">
                             <div
-                                className="bg-[#28282B] h-2 transition-all"
-                                style={{
-                                    width: `${(Object.values(policies).filter(Boolean).length / POLICIES.length) * 100}%`,
-                                }}
+                                className={`bg-[#28282B] h-2 transition-all w-[${(Object.values(policies).filter(Boolean).length / POLICIES.length) * 100}%]`}
                             />
                         </div>
                     </div>

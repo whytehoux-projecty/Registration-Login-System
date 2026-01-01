@@ -46,6 +46,12 @@ const ServicesPage = React.lazy(() =>
     default: m.ServicesPage,
   }))
 );
+const SystemSchedulePage = React.lazy(() =>
+  import("./pages/settings/SystemSchedulePage").then((m) => ({
+    default: m.default,
+  }))
+);
+
 
 const InvitationPageMI = React.lazy(() =>
   import("./modules/membership-initiation/pages/InvitationPage").then((m) => ({
@@ -127,6 +133,7 @@ function App() {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/media" element={<MediaPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/system-schedule" element={<SystemSchedulePage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>

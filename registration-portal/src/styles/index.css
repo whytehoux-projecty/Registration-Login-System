@@ -332,3 +332,57 @@ body {
 .bg-light-grey {
   background-color: #f5f5f7;
 }
+
+/* Warning Stripes Animation */
+@keyframes slide-stripes {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 56px 0;
+  }
+}
+
+.bg-warning-stripes {
+  background-image: repeating-linear-gradient(45deg, #ef4444 0, #ef4444 10px, transparent 10px, transparent 20px);
+  background-size: 56px 56px;
+  animation: slide-stripes 2s linear infinite;
+}
+/* Dynamic animation duration utilities */
+.animate-ping-fast {
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-ping-slow {
+  animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-pulse-fast {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Audio visualizer bar animations */
+.audio-bar-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.audio-bar-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.audio-bar-delay-3 {
+  animation-delay: 0.3s;
+}
+
+.audio-bar-delay-4 {
+  animation-delay: 0.4s;
+}
+
+.audio-bar-delay-5 {
+  animation-delay: 0.5s;
+}

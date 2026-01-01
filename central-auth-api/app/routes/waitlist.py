@@ -116,7 +116,7 @@ class WaitlistStatsResponse(BaseModel):
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(interest_rate_limiter.check_rate_limit)]
 )
-def submit_interest(
+async def submit_interest(
     request: InterestSubmitRequest,
     db: Session = Depends(get_db)
 ):
@@ -127,7 +127,7 @@ def submit_interest(
     Users provide their contact information to request an invitation to register.
     """
     try:
-        waitlist_request = waitlist_service.submit_interest(
+        waitlist_request = await waitlist_service.submit_interest(
             db=db,
             full_name=request.full_name,
             email=request.email,
@@ -274,7 +274,7 @@ def get_request_details(
     "/{request_id}/approve",
     response_model=ApprovalResponse
 )
-def approve_request(
+async def approve_request(
     request_id: int,
     body: ApproveRequestBody,
     db: Session = Depends(get_db),
@@ -289,7 +289,7 @@ def approve_request(
     3. Send the invitation to the user via email
     """
     try:
-        result = waitlist_service.approve_request(
+        result = await waitlist_service.approve_request(
             db=db,
             request_id=request_id,
             admin_username=current_admin.username,
@@ -307,7 +307,7 @@ def approve_request(
 
 
 @router.post("/{request_id}/reject")
-def reject_request(
+async def reject_request(
     request_id: int,
     body: RejectRequestBody,
     db: Session = Depends(get_db),
@@ -317,7 +317,7 @@ def reject_request(
     Reject a waitlist request (Admin only)
     """
     try:
-        success = waitlist_service.reject_request(
+        success = await waitlist_service.reject_request(
             db=db,
             request_id=request_id,
             admin_username=current_admin.username,
