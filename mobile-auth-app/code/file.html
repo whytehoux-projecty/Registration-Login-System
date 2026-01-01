@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Auth - Complete Implementation Guide</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: rgba(139, 92, 246, 0.1);
+      border: 2px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      color: #a78bfa;
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-pills {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      padding: 0.5rem;
+      background: #1e293b;
+      border-radius: 12px;
+    }
+
+    .nav-pill {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .nav-pill:hover {
+      background: rgba(139, 92, 246, 0.1);
+      color: #a78bfa;
+    }
+
+    .nav-pill.active {
+      background: rgba(139, 92, 246, 0.2);
+      border-color: #8b5cf6;
+      color: #a78bfa;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .file-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .file-header {
+      background: #0f172a;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-path {
+      font-family: 'Courier New', monospace;
+      color: #60a5fa;
+      font-size: 0.875rem;
+    }
+
+    .copy-btn {
+      padding: 0.5rem 1rem;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid #8b5cf6;
+      border-radius: 6px;
+      color: #a78bfa;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.3s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(139, 92, 246, 0.3);
+    }
+
+    .copy-btn.copied {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: #22c55e;
+      color: #22c55e;
+    }
+
+    .file-content {
+      padding: 1.5rem;
+    }
+
+    .code-block {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 1.5rem;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .code-block pre {
+      color: #cbd5e1;
+      white-space: pre;
+    }
+
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-box h3 {
+      color: #60a5fa;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .info-box p {
+      color: #93c5fd;
+      font-size: 0.875rem;
+    }
+
+    .deployment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .deployment-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .deployment-card h3 {
+      color: #a78bfa;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+
+    .step-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .step-list li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #334155;
+      color: #cbd5e1;
+    }
+
+    .step-list li:last-child {
+      border-bottom: none;
+    }
+
+    .command {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      font-family: 'Courier New', monospace;
+      color: #22c55e;
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📱 Mobile Auth App - Complete Implementation</h1>
+      <p>Full code for UI Components, Screens, Hooks, Testing & Deployment</p>
+    </div>
+
+    <div class="nav-pills">
+      <button class="nav-pill active" onclick="showSection('components')">1️⃣ Components</button>
+      <button class="nav-pill" onclick="showSection('screens')">2️⃣ Screens</button>
+      <button class="nav-pill" onclick="showSection('hooks')">3️⃣ Hooks</button>
+      <button class="nav-pill" onclick="showSection('testing')">4️⃣ Testing</button>
+      <button class="nav-pill" onclick="showSection('deployment')">5️⃣ Deployment</button>
+    </div>
+
+    <!-- COMPONENTS SECTION -->
+    <div id="components" class="section active">
+      <h2 style="color: #a78bfa; margin-bottom: 2rem;">🎨 Step 1: UI Components</h2>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/components/common/Button.tsx</span>
+          <button class="copy-btn" onclick="copyCode(this, 'btn')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="info-box">
+            <h3>Reusable Button Component</h3>
+            <p>Supports primary, outline, text variants with loading states</p>
+          </div>
+          <div class="code-block">
+            <pre id="btn">import React from 'react';
+import { Pressable, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { COLORS, SPACING } from '@constants/theme';
+
+interface ButtonProps {
+  title: string;
+  onPress: () => void;
+  variant?: 'primary' | 'outline' | 'text';
+  size?: 'small' | 'medium' | 'large';
+  loading?: boolean;
+  disabled?: boolean;
+}
+
+export function Button({
+  title, onPress, variant = 'primary',
+  size = 'medium', loading = false, disabled = false
+}: ButtonProps) {
+  const isDisabled = disabled || loading;
+  
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={isDisabled}
+      style={({ pressed }) => [
+        styles.base, styles[size], styles[variant],
+        pressed && styles[`${variant}Pressed`],
+        isDisabled && styles.disabled
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator color={variant === 'primary' ? '#fff' : COLORS.primary} />
+      ) : (
+        <Text style={[styles.text, styles[`${variant}Text`]]}>{title}</Text>
+      )}
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  base: { borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  small: { paddingVertical: 8, paddingHorizontal: 16 },
+  medium: { paddingVertical: 16, paddingHorizontal: 24 },
+  large: { paddingVertical: 20, paddingHorizontal: 32 },
+  primary: { backgroundColor: COLORS.primary },
+  primaryPressed: { backgroundColor: COLORS.primaryDark },
+  outline: { borderWidth: 2, borderColor: COLORS.primary, backgroundColor: 'transparent' },
+  outlinePressed: { backgroundColor: COLORS.primary + '20' },
+  text: { backgroundColor: 'transparent' },
+  textPressed: { opacity: 0.7 },
+  text: { fontSize: 16, fontWeight: '600' },
+  primaryText: { color: '#fff' },
+  outlineText: { color: COLORS.primary },
+  textText: { color: COLORS.primary },
+  disabled: { opacity: 0.5 }
+});</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/components/scanner/CameraView.tsx</span>
+          <button class="copy-btn" onclick="copyCode(this, 'cam')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="info-box">
+            <h3>QR Scanner Camera</h3>
+            <p>Full-screen camera with QR detection and permission handling</p>
+          </div>
+          <div class="code-block">
+            <pre id="cam">import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as Haptics from 'expo-haptics';
+import { Button } from '@components/common';
+import { COLORS, SPACING } from '@constants/theme';
+
+interface QRCameraViewProps {
+  onScan: (data: string) => void;
+  onCancel: () => void;
+}
+
+export function QRCameraView({ onScan, onCancel }: QRCameraViewProps) {
+  const [permission, requestPermission] = useCameraPermissions();
+  const [scanned, setScanned] = useState(false);
+  const [flashOn, setFlashOn] = useState(false);
+
+  if (!permission?.granted) {
+    return (
+      <View style={styles.permissionContainer}>
+        <Text style={styles.permissionText}>
+          📷 Camera access required to scan QR codes
+        </Text>
+        <Button title="Grant Permission" onPress={requestPermission} />
+        <Button title="Cancel" variant="text" onPress={onCancel} />
+      </View>
+    );
+  }
+
+  const handleBarCodeScanned = async ({ data }: { data: string }) => {
+    if (scanned) return;
+    setScanned(true);
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onScan(data);
+  };
+
+  return (
+    <View style={styles.container}>
+      <CameraView
+        style={StyleSheet.absoluteFill}
+        facing="back"
+        enableTorch={flashOn}
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+      />
+      <View style={styles.overlay}>
+        <View style={styles.scanFrame} />
+        <Text style={styles.instructionText}>Point camera at QR code</Text>
+      </View>
+      <View style={styles.controls}>
+        <Button
+          title={flashOn ? '💡 Flash On' : '💡 Flash Off'}
+          variant="outline"
+          onPress={() => setFlashOn(!flashOn)}
+        />
+        <Button title="Cancel" variant="text" onPress={onCancel} />
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background },
+  permissionContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', 
+    padding: 24, gap: 16, backgroundColor: COLORS.background },
+  permissionText: { fontSize: 16, color: COLORS.text, textAlign: 'center' },
+  overlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center' },
+  scanFrame: { width: 250, height: 250, borderWidth: 3, borderColor: COLORS.primary, 
+    borderRadius: 20 },
+  instructionText: { marginTop: 32, fontSize: 18, color: COLORS.text, 
+    backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 24, paddingVertical: 16, 
+    borderRadius: 8 },
+  controls: { position: 'absolute', bottom: 48, left: 32, right: 32, gap: 16 }
+});</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/components/pin/PinDisplay.tsx</span>
+          <button class="copy-btn" onclick="copyCode(this, 'pin')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="code-block">
+            <pre id="pin">import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
+import * as Haptics from 'expo-haptics';
+import { COLORS, SPACING } from '@constants/theme';
+
+interface PinDisplayProps {
+  pin: string;
+  serviceName: string;
+  expiresIn: number;
+}
+
+export function PinDisplay({ pin, serviceName, expiresIn }: PinDisplayProps) {
+  const [timeLeft, setTimeLeft] = useState(expiresIn);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTimeLeft(p => Math.max(0, p - 1)), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const copyToClipboard = async () => {
+    await Clipboard.setStringAsync(pin);
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const formatTime = (s: number) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+  const progressPercent = (timeLeft / expiresIn) * 100;
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.successIcon}>✅</Text>
+        <Text style={styles.successText}>Success!</Text>
+        <Text style={styles.serviceText}>Authenticated to {serviceName}</Text>
+      </View>
+      <Text style={styles.enterText}>Enter this code:</Text>
+      <Pressable onPress={copyToClipboard} style={styles.pinContainer}>
+        {pin.split('').map((d, i) => (
+          <View key={i} style={styles.digitBox}>
+            <Text style={styles.digit}>{d}</Text>
+          </View>
+        ))}
+      </Pressable>
+      <Text style={styles.hint}>{copied ? '✓ Copied!' : 'Tap to copy'}</Text>
+      <View style={styles.timerContainer}>
+        <Text style={styles.timerText}>Expires in {formatTime(timeLeft)}</Text>
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { alignItems: 'center', padding: 32 },
+  header: { alignItems: 'center', marginBottom: 32 },
+  successIcon: { fontSize: 48, marginBottom: 8 },
+  successText: { fontSize: 24, fontWeight: 'bold', color: COLORS.success },
+  serviceText: { fontSize: 16, color: COLORS.textSecondary, marginTop: 4 },
+  enterText: { fontSize: 18, color: COLORS.text, marginBottom: 16 },
+  pinContainer: { flexDirection: 'row', gap: 8 },
+  digitBox: { width: 48, height: 64, backgroundColor: COLORS.surface, borderRadius: 12,
+    justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: COLORS.primary },
+  digit: { fontSize: 32, fontWeight: 'bold', color: COLORS.text },
+  hint: { fontSize: 14, color: COLORS.textMuted, marginTop: 16 },
+  timerContainer: { marginTop: 32, width: '100%' },
+  timerText: { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center', marginBottom: 8 },
+  progressBar: { width: '100%', height: 4, backgroundColor: COLORS.surface, borderRadius: 2 },
+  progressFill: { height: '100%', backgroundColor: COLORS.primary }
+});</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREENS SECTION -->
+    <div id="screens" class="section">
+      <h2 style="color: #a78bfa; margin-bottom: 2rem;">📱 Step 2: App Screens</h2>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/app/_layout.tsx</span>
+          <button class="copy-btn" onclick="copyCode(this, 'layout')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="code-block">
+            <pre id="layout">import React, { useEffect } from 'react';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useAuthStore } from '@stores/authStore';
+
+export default function RootLayout() {
+  const loadAuth = useAuthStore(s => s.loadAuth);
+  useEffect(() => { loadAuth(); }, []);
+
+  return (
+    <>
+      <StatusBar style="light" />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(onboarding)" />
+        <Stack.Screen name="(auth)" />
+      </Stack>
+    </>
+  );
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/app/(onboarding)/welcome.tsx</span>
+          <button class="copy-btn" onclick="copyCode(this, 'welcome')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="code-block">
+            <pre id="welcome">import React from 'react';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { router } from 'expo-router';
+import { Button } from '@components/common';
+import { COLORS, SPACING } from '@constants/theme';
+
+export default function WelcomeScreen() {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.logo}>🔐</Text>
+        <Text style={styles.title}>Central Auth</Text>
+        <Text style={styles.subtitle}>
+          Secure authentication for all your services
+        </Text>
+      </View>
+      <View style={styles.footer}>
+        <Button 
+          title="Get Started" 
+          onPress={() => router.push('/(onboarding)/link-account')}
+          size="large"
+        />
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background, padding: 32 },
+  content: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  logo: { fontSize: 80, marginBottom: 24 },
+  title: { fontSize: 32, fontWeight: 'bold', color: COLORS.text, marginBottom: 8 },
+  subtitle: { fontSize: 16, color: COLORS.textSecondary, textAlign: 'center' },
+  footer: { gap: 16 }
+});</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/app/(onboarding)/link-account.tsx</span>
+          <button class="copy-btn" onclick="copyCode(this, 'link')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="code-block">
+            <pre id="link">import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { router } from 'expo-router';
+import { Button } from '@components/common';
+import { useAuthStore } from '@stores/authStore';
+import { authApi } from '@services/api';
+import { COLORS, SPACING } from '@constants/theme';
+
+export default function LinkAccountScreen() {
+  const [authKey, setAuthKey] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { setAuthKey: saveKey } = useAuthStore();
+
+  const handleContinue = async () => {
+    if (!authKey.trim()) {
+      Alert.alert('Error', 'Please enter your membership key');
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await authApi.validateKey(authKey.trim());
+      if (result.valid) {
+        await saveKey(authKey.trim());
+        router.replace('/(auth)/home');
+      } else {
+        Alert.alert('Invalid Key', result.error || 'Please check and try again');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to validate key');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Enter your Membership Key</Text>
+      <Text style={styles.subtitle}>Find this in your profile on the admin portal</Text>
+      <TextInput
+        style={styles.input}
+        value={authKey}
+        onChangeText={setAuthKey}
+        placeholder="xxxx-xxxx-xxxx-xxxx"
+        placeholderTextColor={COLORS.textMuted}
+        autoCapitalize="none"
+      />
+      <View style={styles.footer}>
+        <Button
+          title="Continue"
+          onPress={handleContinue}
+          loading={loading}
+          disabled={!authKey.trim()}
+          size="large"
+        />
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background, padding: 32 },
+  title: { fontSize: 24, fontWeight: '600', color: COLORS.text, marginBottom: 8 },
+  subtitle: { fontSize: 14, color: COLORS.textSecondary, marginBottom: 24 },
+  input: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 16, fontSize: 18,
+    color: COLORS.text, borderWidth: 1, borderColor: COLORS.border },
+  footer: { marginTop: 'auto' }
+});</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/app/(auth)/home.tsx</span>
+          <button class="copy-btn" onclick="copyCode(this, 'home')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="code-block">
+            <pre id="home">import React from 'react';
+import { View, Text, StyleSheet, SafeAreaView, Pressable } from 'react-native';
+import { router } from 'expo-router';
+import { COLORS, SPACING } from '@constants/theme';
+
+export default function HomeScreen() {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.header}>Central Auth</Text>
+      <Text style={styles.subtitle}>Ready to authenticate</Text>
+      
+      <Pressable 
+        style={styles.scanButton}
+        onPress={() => router.push('/(auth)/scan')}
+      >
+        <Text style={styles.scanIcon}>📷</Text>
+        <Text style={styles.scanTitle}>Scan QR Code</Text>
+        <Text style={styles.scanSubtitle}>Tap to scan and authenticate</Text>
+      </Pressable>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background, padding: 32 },
+  header: { fontSize: 28, fontWeight: 'bold', color: COLORS.text, marginBottom: 8 },
+  subtitle: { fontSize: 16, color: COLORS.textSecondary, marginBottom: 48 },
+  scanButton: { backgroundColor: COLORS.surface, borderRadius: 16, padding: 48,
+    alignItems: 'center', borderWidth: 2, borderColor: COLORS.primary },
+  scanIcon: { fontSize: 64, marginBottom: 16 },
+  scanTitle: { fontSize: 24, fontWeight: '600', color: COLORS.text, marginBottom: 8 },
+  scanSubtitle: { fontSize: 14, color: COLORS.textSecondary }
+});</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/app/(auth)/scan.tsx</span>
+          <button class="copy-btn" onclick="copyCode(this, 'scan')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="code-block">
+            <pre id="scan">import React from 'react';
+import { router } from 'expo-router';
+import { QRCameraView } from '@components/scanner/CameraView';
+import { useQRScanner } from '@hooks/useQRScanner';
+
+export default function ScanScreen() {
+  const { handleScan } = useQRScanner();
+
+  const onScan = async (data: string) => {
+    const result = await handleScan(data);
+    if (result.success) {
+      router.push({
+        pathname: '/(auth)/result',
+        params: { 
+          pin: result.pin, 
+          serviceName: result.serviceName,
+          expiresIn: result.expiresIn 
+        }
+      });
+    }
+  };
+
+  return <QRCameraView onScan={onScan} onCancel={() => router.back()} />;
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/app/(auth)/result.tsx</span>
+          <button class="copy-btn" onclick="copyCode(this, 'result')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="code-block">
+            <pre id="result">import React from 'react';
+import { View, StyleSheet, SafeAreaView } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { PinDisplay } from '@components/pin/PinDisplay';
+import { Button } from '@components/common';
+import { COLORS } from '@constants/theme';
+
+export default function ResultScreen() {
+  const { pin, serviceName, expiresIn } = useLocalSearchParams();
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <PinDisplay
+        pin={pin as string}
+        serviceName={serviceName as string}
+        expiresIn={parseInt(expiresIn as string)}
+      />
+      <View style={styles.footer}>
+        <Button title="Done" onPress={() => router.push('/(auth)/home')} size="large" />
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background },
+  footer: { padding: 32 }
+});</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOOKS SECTION -->
+    <div id="hooks" class="section">
+      <h2 style="color: #a78bfa; margin-bottom: 2rem;">🪝 Step 3: Custom Hooks</h2>
+
+      <div class="file-card">
+        <div class="file-header">
+          <span class="file-path">src/hooks/useQRScanner.ts</span>
+          <button class="copy-btn" onclick="copyCode(this, 'scanner')">Copy</button>
+        </div>
+        <div class="file-content">
+          <div class="info-box">
+            <h3>QR Scanner Hook</h3>
+            <p>Handles QR code validation and API communication</p>
+          </div>
+          <div class="code-block">
+            <pre id="scanner">import { useState, useCallback } from 'react';
+import { Alert } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { authApi } from '@services/api';
