@@ -166,8 +166,7 @@ export interface UserStats {
   last_login?: string
   first_login?: string
 }
-first_login ?: string
-}
+
 
 class ApiService {
   private instance: AxiosInstance

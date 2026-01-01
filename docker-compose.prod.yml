@@ -11,6 +11,7 @@ services:
     volumes:
       - ./central-auth-api/data:/app/data
       - ./central-auth-api/logs:/app/logs
+      - ./central-auth-api/uploads:/app/uploads
     environment:
       - DATABASE_URL=sqlite:///./data/auth_system.db
       - PRODUCTION=True

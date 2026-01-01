@@ -17,7 +17,10 @@ from app.routes import registration, admin, auth, services, system, invitation, 
 from app.models import waitlist as waitlist_model  # noqa: F401
 
 # Create all database tables
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Warning: Database table creation failed (might already exist): {e}")
 
 # Initialize FastAPI application
 app = FastAPI(
