@@ -4,6 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  VITE_API_BASE_URL = "https://9cfd37b8d7ab.ngrok-free.app" # Temporary ngrok URL
 
 [[redirects]]
   from = "/*"
