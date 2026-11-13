@@ -23,7 +23,7 @@ Deploy by uploading this folder to any static host. `js/config.js` is the only p
 ## Structure
 
 ```
-index.html        Landing: hero, how it works
+index.html        Landing: SPACE emblem and the two entry points
 interest.html     Waitlist form (always on) + gated entry to registration
 invitation.html   Invitation code + PIN verification, starts the 3-hour session
 register.html     5 steps: personal, address, credentials, photos, oath & policies
