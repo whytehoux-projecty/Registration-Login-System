@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SPACE membership registration portal — request an invitation or complete your registration.">
+  <title>SPACE — Membership Registration</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Graduate&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero__top">
+      <div class="beacon" data-beacon data-state="checking">
+        <span class="beacon__dot" aria-hidden="true"></span>
+        <span data-beacon-label>Checking…</span>
+      </div>
+    </div>
+
+    <div class="hero__body">
+      <h1 class="sr-only">SPACE</h1>
+      <img class="hero__emblem" src="assets/space-emblem.svg" alt="SPACE emblem" width="400" height="405">
+      <p class="hero__tag">A unified membership ecosystem built for seamless access, enhanced security and global connectivity. Entry is by invitation.</p>
+      <div class="hero__cta">
+        <a class="btn btn--light" href="interest.html">
+          Request an invitation
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+        <a class="btn btn--outline-light" href="invitation.html">I have an invitation code</a>
+      </div>
+    </div>
+
+    <a class="hero__scroll" href="#about">Learn more ↓</a>
+  </header>
+
+  <main>
+    <section class="band band--dark" id="about">
+      <div class="band__inner">
+        <div class="band__head">
+          <h2 class="display">Redefining Membership</h2>
+          <p>Experience a unified ecosystem designed for seamless access, enhanced security, and global connectivity. Your gateway to the Whytehoux network starts here.</p>
+        </div>
+
+        <div class="features">
+          <article class="feature">
+            <div class="feature__icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+            <h3>Secure Identity</h3>
+            <p>Enterprise-grade encryption and biometric-ready authentication ensure your digital identity remains protected at all times.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+            <h3>Instant Access</h3>
+            <p>Seamlessly navigate through the entire ecosystem with a single credential. No more multiple logins or forgotten passwords.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div>
+            <h3>Global Community</h3>
+            <p>Connect with a curated network of professionals and peers. Your membership opens doors to exclusive events and opportunities.</p>
+          </article>
+        </div>
+
+        <dl class="stats">
+          <div><dt>10k+</dt><dd>Members</dd></div>
+          <div><dt>99.9%</dt><dd>Uptime</dd></div>
+          <div><dt>256-bit</dt><dd>Encryption</dd></div>
+          <div><dt>24/7</dt><dd>Support</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="band" id="how">
+      <div class="band__inner">
+        <div class="band__head">
+          <h2 class="display">How it works</h2>
+          <p class="muted">Five steps from first contact to a submitted application. Once your invitation is verified you have three hours to finish.</p>
+        </div>
+
+        <ol class="steps">
+          <li><h3>Request an invitation</h3><p>Tell us who you are. Approved requests receive a code and PIN by email.</p></li>
+          <li><h3>Verify your invitation</h3><p>Enter the code and 4-digit PIN to open your registration session.</p></li>
+          <li><h3>Complete your profile</h3><p>Personal details, address and the credentials you will sign in with.</p></li>
+          <li><h3>Add photos &amp; oath</h3><p>Upload 1–5 identification photos and record the membership oath.</p></li>
+          <li><h3>Submit for review</h3><p>Accept the policies and submit. Our admins review every application.</p></li>
+        </ol>
+
+        <div class="band__cta">
+          <a class="btn" href="interest.html">Request an invitation</a>
+          <a class="btn btn--ghost" href="invitation.html">Complete registration</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer__by">Powered by</p>
+    <img src="assets/whytehoux.png" alt="Whytehoux" width="210" height="82">
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/api.js"></script>
+  <script>MIS.startStatus();</script>
+</body>
+</html>

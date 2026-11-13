@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registration — SPACE</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Graduate&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="bar">
+    <a class="bar__brand" href="index.html" aria-label="SPACE — back to home">
+      <img src="assets/space-emblem.svg" alt="" width="44" height="44">
+    </a>
+    <div class="bar__right">
+      <div class="timer" data-timer hidden title="Time remaining to complete registration">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span data-timer-value>0:00:00</span>
+      </div>
+      <div class="beacon" data-beacon data-state="checking">
+        <span class="beacon__dot" aria-hidden="true"></span>
+        <span data-beacon-label>Checking…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="notice notice--warn" data-closing hidden style="margin-bottom:1.5rem">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <p data-closing-text></p>
+    </div>
+
+    <nav aria-label="Registration progress">
+      <ol class="stepper" id="stepper">
+        <li><button type="button" data-goto="1"><span class="stepper__num">1</span><span class="stepper__label">Personal</span></button></li>
+        <li><button type="button" data-goto="2"><span class="stepper__num">2</span><span class="stepper__label">Address</span></button></li>
+        <li><button type="button" data-goto="3"><span class="stepper__num">3</span><span class="stepper__label">Credentials</span></button></li>
+        <li><button type="button" data-goto="4"><span class="stepper__num">4</span><span class="stepper__label">Photos</span></button></li>
+        <li><button type="button" data-goto="5"><span class="stepper__num">5</span><span class="stepper__label">Oath</span></button></li>
+      </ol>
+    </nav>
+
+    <form id="reg-form" novalidate>
+
+      <!-- ============ Step 1: Personal ============ -->
+      <section class="card stack" data-step="1" hidden style="--gap:1.25rem">
+        <h1 class="display card__title" tabindex="-1">Personal information</h1>
+        <div class="grid-2">
+          <div class="field">
+            <label for="firstName">First name <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="firstName" name="firstName" type="text" autocomplete="given-name" placeholder="Enter your first name" required>
+            <p class="field__error" data-error-for="firstName" hidden></p>
+          </div>
+          <div class="field">
+            <label for="lastName">Last name <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="lastName" name="lastName" type="text" autocomplete="family-name" placeholder="Enter your last name" required>
+            <p class="field__error" data-error-for="lastName" hidden></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="email">Email address <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="email" name="email" type="email" autocomplete="email" placeholder="example@email.com" required>
+          <p class="field__error" data-error-for="email" hidden></p>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="phone">Phone number <span class="opt">(optional)</span></label>
+            <input class="input" id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+1 (234) 567-8900">
+            <p class="field__error" data-error-for="phone" hidden></p>
+          </div>
+          <div class="field">
+            <label for="dateOfBirth">Date of birth <span class="opt">(optional)</span></label>
+            <input class="input" id="dateOfBirth" name="dateOfBirth" type="date" autocomplete="bday">
+            <p class="field__error" data-error-for="dateOfBirth" hidden></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="occupation">Occupation <span class="opt">(optional)</span></label>
+          <input class="input" id="occupation" name="occupation" type="text" autocomplete="organization-title" placeholder="Enter your occupation">
+        </div>
+      </section>
+
+      <!-- ============ Step 2: Address ============ -->
+      <section class="card stack" data-step="2" hidden style="--gap:1.25rem">
+        <h1 class="display card__title" tabindex="-1">Address information</h1>
+        <div class="field">
+          <label for="address">Street address</label>
+          <input class="input" id="address" name="address" type="text" autocomplete="street-address" placeholder="123 Main Street">
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="city">City</label>
+            <input class="input" id="city" name="city" type="text" autocomplete="address-level2" placeholder="City name">
+          </div>
+          <div class="field">
+            <label for="state">State / Province</label>
+            <input class="input" id="state" name="state" type="text" autocomplete="address-level1" placeholder="State/Province">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="postalCode">Postal code</label>
+            <input class="input" id="postalCode" name="postalCode" type="text" autocomplete="postal-code" placeholder="12345">
+          </div>
+          <div class="field">
+            <label for="country">Country</label>
+            <input class="input" id="country" name="country" type="text" autocomplete="country-name" placeholder="Country">
+          </div>
+        </div>
+        <div class="field">
+          <label for="bio">Short bio</label>
+          <textarea class="input" id="bio" name="bio" rows="4" maxlength="1000" placeholder="Tell us a bit about yourself..."></textarea>
+          <p class="field__hint"><span data-bio-count>0</span>/1000</p>
+        </div>
+      </section>
+
+      <!-- ============ Step 3: Credentials ============ -->
+      <section class="card stack" data-step="3" hidden style="--gap:1.25rem">
+        <div>
+          <h1 class="display card__title" tabindex="-1">Account credentials</h1>
+          <p class="muted" style="margin-top:.5rem">Create your login credentials. These will be used to access your account once approved.</p>
+        </div>
+        <div class="field">
+          <label for="username">Username <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="50" placeholder="your_username" required>
+          <p class="field__hint">3–50 characters: lowercase letters, numbers and underscores</p>
+          <p class="field__error" data-error-for="username" hidden></p>
+        </div>
+        <div class="field">
+          <label for="password">Password <span class="req" aria-hidden="true">*</span></label>
+          <div class="input-group">
+            <input class="input" id="password" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required>
+            <button class="input-group__btn" type="button" data-toggle="password" aria-pressed="false">Show</button>
+          </div>
+          <div class="meter" data-meter data-score="0" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+          <p class="field__hint" data-meter-label aria-live="polite">Minimum 8 characters. Longer, with mixed characters, is stronger.</p>
+          <p class="field__error" data-error-for="password" hidden></p>
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirm password <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Re-enter your password" required>
+          <p class="field__error" data-error-for="confirmPassword" hidden></p>
+        </div>
+      </section>
+
+      <!-- ============ Step 4: Photos ============ -->
+      <section class="card stack" data-step="4" hidden style="--gap:1.25rem">
+        <div>
+          <h1 class="display card__title" tabindex="-1">Upload photos</h1>
+          <p class="muted" style="margin-top:.5rem">Please upload 1–5 clear photos of yourself. These will be used for identification.</p>
+        </div>
+        <label class="drop" id="drop">
+          <input class="sr-only" type="file" id="photo-input" accept="image/*" multiple>
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <strong data-drop-title>Click to choose photos, or drag them here</strong>
+          <p class="small muted" data-drop-hint></p>
+        </label>
+        <div class="progress" id="photo-progress" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" hidden><span></span></div>
+        <ul class="photos" id="photo-list" aria-label="Uploaded photos"></ul>
+        <p class="field__error" data-error-for="photos" hidden></p>
+      </section>
+
+      <!-- ============ Step 5: Oath, policies, submit ============ -->
+      <section class="stack" data-step="5" hidden style="--gap:1.5rem">
+        <div class="center">
+          <h1 class="display" style="font-size:clamp(1.6rem,4.5vw,2.1rem)" tabindex="-1">Membership oath</h1>
+          <p class="muted" style="margin-top:.5rem">Record yourself reading the oath, accept the policies, then submit.</p>
+        </div>
+
+        <div class="card card--flat">
+          <h2 class="section-head">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Read the following oath aloud
+          </h2>
+          <blockquote class="oath-text">I solemnly declare that I will uphold the values and principles of this organization. I commit to act with integrity, respect fellow members, and contribute positively to our community. I understand that membership is a privilege and I will honor this trust placed in me.</blockquote>
+        </div>
+
+        <div class="card card--flat">
+          <h2 class="section-head">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+            Record your oath
+          </h2>
+
+          <div class="notice notice--danger" id="rec-unsupported" hidden>
+            <p>This browser cannot record audio. Please use a current version of Chrome, Edge, Firefox or Safari over HTTPS.</p>
+          </div>
+
+          <!-- idle / recording -->
+          <div class="recorder" id="rec-capture">
+            <button class="rec-btn" type="button" id="rec-btn" aria-pressed="false" aria-label="Start recording">
+              <svg data-icon="mic" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+              <svg data-icon="stop" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" hidden><rect x="6" y="6" width="12" height="12"/></svg>
+            </button>
+            <p class="muted" id="rec-hint" style="margin-top:.75rem">Click to start recording</p>
+            <div id="rec-live" hidden>
+              <p class="rec-time" id="rec-time" role="timer">0:00</p>
+              <div class="levels" id="rec-levels" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+          </div>
+
+          <!-- recorded, waiting to be saved -->
+          <div class="stack" id="rec-review" hidden>
+            <audio id="rec-audio" controls></audio>
+            <p class="small muted">Duration: <span id="rec-duration">0:00</span> — listen back, then save it or record again.</p>
+            <div class="grid-2">
+              <button class="btn btn--ghost" type="button" data-rec-reset>Record again</button>
+              <button class="btn" type="button" id="rec-save">Save recording</button>
+            </div>
+          </div>
+
+          <!-- uploaded -->
+          <div class="stack" id="rec-saved" hidden>
+            <div class="notice notice--ok">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <div><strong>Oath recording saved</strong><p>Duration <span id="rec-saved-duration">0:00</span></p></div>
+            </div>
+            <button class="link-btn" type="button" data-rec-reset>Replace with a new recording</button>
+          </div>
+        </div>
+
+        <div class="card card--flat">
+          <h2 class="section-head">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Accept policies
+          </h2>
+          <div class="policy-list" id="policies">
+            <label class="check"><input type="checkbox" name="policy" value="terms"><span>I accept the <span data-policy="terms">Terms and Conditions</span></span></label>
+            <label class="check"><input type="checkbox" name="policy" value="privacy"><span>I accept the <span data-policy="privacy">Privacy Policy</span></span></label>
+            <label class="check"><input type="checkbox" name="policy" value="conduct"><span>I accept the <span data-policy="conduct">Code of Conduct</span></span></label>
+            <label class="check"><input type="checkbox" name="policy" value="ethics"><span>I accept the <span data-policy="ethics">Ethical Guidelines</span></span></label>
+          </div>
+          <div style="margin-top:1rem">
+            <p class="small muted" style="margin-bottom:.4rem"><span id="policy-count">0</span> of 4 accepted</p>
+            <div class="progress" id="policy-progress"><span></span></div>
+          </div>
+        </div>
+
+        <details class="summary card--flat" style="background:var(--surface)">
+          <summary>Review your details before submitting</summary>
+          <dl class="rows" id="review"></dl>
+        </details>
+
+        <div class="notice notice--warn" id="todo-box">
+          <div>
+            <strong>Before you can submit</strong>
+            <ul class="todo">
+              <li data-todo="oath">Record and save your oath</li>
+              <li data-todo="policies">Accept all four policies</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="step-actions">
+        <button class="btn btn--ghost" type="button" id="back" hidden>Back</button>
+        <button class="btn" type="submit" id="next">Continue</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>
