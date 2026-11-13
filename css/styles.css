@@ -237,8 +237,9 @@ textarea.input { resize: vertical; min-height: 110px; }
 /* Two themes, exact inverses of each other. Everything on the landing page is
    drawn from these four properties, so switching theme is a single attribute
    on <html>. Dark is the default.
-   --hero-art flips the logo artwork: both logos are black-on-transparent
-   files, shown as-is on white and inverted to white on black. */
+   --hero-art flips the logo artwork: the logos are black-on-transparent
+   files, shown as-is on white and inverted to white on black (the emblem's
+   red eyes sit in their own unfiltered layer). */
 .hero {
   --hero-bg: #000;
   --hero-fg: #fff;
@@ -274,10 +275,13 @@ textarea.input { resize: vertical; min-height: 110px; }
   gap: clamp(1.5rem, 4vh, 2.75rem); padding: 1rem clamp(1rem, 5vw, 3rem) 4.5rem; text-align: center;
 }
 .hero__emblem {
-  width: min(50vh, 76vw); height: auto; filter: var(--hero-art);
+  width: min(50vh, 76vw); display: grid;
   animation: float 7s ease-in-out infinite;
-  transition: filter 0.3s ease;
 }
+.hero__emblem img { grid-area: 1 / 1; width: 100%; height: auto; display: block; }
+/* Only the body of the emblem flips with the theme. The eyes are a separate
+   layer in a fixed blood red, so the filter never touches them. */
+.hero__emblem .emblem__body { filter: var(--hero-art); transition: filter 0.3s ease; }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 .hero__cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
 
