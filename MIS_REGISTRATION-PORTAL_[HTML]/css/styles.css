@@ -93,10 +93,11 @@ button, input, textarea { font: inherit; color: inherit; }
 .btn--block { width: 100%; }
 .btn--ghost { background: transparent; color: var(--ink); }
 .btn--ghost:hover:not(:disabled) { background: var(--ink); color: #fff; }
-.btn--light { background: #fff; color: var(--black); border-color: #fff; }
-.btn--light:hover:not(:disabled) { box-shadow: 4px 4px 0 rgba(255, 255, 255, 0.35); }
-.btn--outline-light { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.6); }
-.btn--outline-light:hover:not(:disabled) { border-color: #fff; background: rgba(255, 255, 255, 0.08); box-shadow: none; }
+/* Landing buttons follow the landing theme (see .hero custom properties). */
+.btn--light { background: var(--hero-fg); color: var(--hero-bg); border-color: var(--hero-fg); }
+.btn--light:hover:not(:disabled) { box-shadow: 4px 4px 0 rgba(var(--hero-fg-rgb), 0.35); }
+.btn--outline-light { background: transparent; color: var(--hero-fg); border-color: rgba(var(--hero-fg-rgb), 0.6); }
+.btn--outline-light:hover:not(:disabled) { border-color: var(--hero-fg); background: rgba(var(--hero-fg-rgb), 0.08); box-shadow: none; }
 .btn--sm { min-height: 40px; padding: 0.4rem 0.9rem; font-size: 0.8125rem; }
 
 .link-btn {
@@ -233,29 +234,68 @@ textarea.input { resize: vertical; min-height: 110px; }
 
 /* ---------- Landing ------------------------------------------------------ */
 
+/* Two themes, exact inverses of each other. Everything on the landing page is
+   drawn from these four properties, so switching theme is a single attribute
+   on <html>. Dark is the default.
+   --hero-art flips the logo artwork: both logos are black-on-transparent
+   files, shown as-is on white and inverted to white on black. */
+.hero {
+  --hero-bg: #000;
+  --hero-fg: #fff;
+  --hero-fg-rgb: 255, 255, 255;
+  --hero-art: invert(1);
+}
+:root[data-theme="light"] .hero {
+  --hero-bg: #fff;
+  --hero-fg: #000;
+  --hero-fg-rgb: 0, 0, 0;
+  --hero-art: invert(0);
+}
+
 .hero {
   position: relative; overflow: hidden; isolation: isolate;
   min-height: 100vh; min-height: 100svh;
   display: flex; flex-direction: column;
-  background: var(--black); color: #fff;
+  background: var(--hero-bg); color: var(--hero-fg);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 .hero__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.25rem clamp(1rem, 4vw, 2.5rem); }
-/* The Whytehoux logo is black artwork on a transparent background, so it is
-   inverted to white to stay visible on the black hero. */
-.presenter { text-align: center; color: #fff; }
-.presenter img { width: clamp(132px, 13vw, 168px); height: auto; filter: invert(1) drop-shadow(0 0 0.6px #fff); }
+.presenter { text-align: center; }
+.presenter img {
+  width: clamp(132px, 13vw, 168px); height: auto;
+  /* the faint same-colour shadow thickens the thin script lettering */
+  filter: var(--hero-art) drop-shadow(0 0 0.6px var(--hero-fg));
+  transition: filter 0.3s ease;
+}
 .presenter p { margin-top: 0.1rem; font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 0.3em; text-indent: 0.3em; text-transform: uppercase; }
-.hero .beacon { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.45); }
+.hero .beacon { background: transparent; color: var(--hero-fg); border-color: rgba(var(--hero-fg-rgb), 0.45); transition: color 0.3s ease, border-color 0.3s ease; }
 .hero__body {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: clamp(1.5rem, 4vh, 2.75rem); padding: 1rem clamp(1rem, 5vw, 3rem) 3rem; text-align: center;
+  gap: clamp(1.5rem, 4vh, 2.75rem); padding: 1rem clamp(1rem, 5vw, 3rem) 4.5rem; text-align: center;
 }
 .hero__emblem {
-  width: min(50vh, 76vw); height: auto; filter: invert(1);
+  width: min(50vh, 76vw); height: auto; filter: var(--hero-art);
   animation: float 7s ease-in-out infinite;
+  transition: filter 0.3s ease;
 }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 .hero__cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
+
+.theme-toggle {
+  position: absolute; right: clamp(1rem, 4vw, 2.5rem); bottom: 1.25rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  min-height: 44px; padding: 0 0.9rem;
+  background: transparent; color: var(--hero-fg);
+  border: 2px solid rgba(var(--hero-fg-rgb), 0.45);
+  font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease, background-color 0.15s ease;
+}
+.theme-toggle:hover { border-color: var(--hero-fg); background: rgba(var(--hero-fg-rgb), 0.08); }
+.theme-toggle svg { width: 18px; height: 18px; }
+/* Show the icon of the theme the button switches to. */
+.theme-toggle [data-icon="moon"], :root[data-theme="light"] .theme-toggle [data-icon="sun"] { display: none; }
+:root[data-theme="light"] .theme-toggle [data-icon="moon"] { display: block; }
 
 /* ---------- Interest (split) -------------------------------------------- */
 
@@ -420,6 +460,7 @@ audio { width: 100%; }
 .demo-bar code { font-family: var(--font-mono); font-weight: 600; }
 .demo-bar select { font: inherit; padding: 0.15rem 0.3rem; border: 1px solid var(--ink); background: #fff; }
 body.has-demo-bar { padding-bottom: 3.5rem; }
+body.has-demo-bar .hero { min-height: calc(100vh - 3.5rem); min-height: calc(100svh - 3.5rem); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
