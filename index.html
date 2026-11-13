@@ -10,6 +10,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Graduate&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <meta name="theme-color" content="#000000">
+  <script>
+    // Apply the saved theme before first paint so the page never flashes.
+    (function () {
+      var theme = 'dark';
+      try { if (localStorage.getItem('mis.theme') === 'light') theme = 'light'; } catch (e) {}
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 </head>
 <body>
 
@@ -36,11 +45,40 @@
         <a class="btn btn--outline-light" href="invitation.html">I have an invitation code</a>
       </div>
     </div>
+
+    <button class="theme-toggle" type="button" id="theme-toggle">
+      <svg data-icon="sun" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"/></svg>
+      <svg data-icon="moon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      <span data-theme-label>Light</span>
+    </button>
   </main>
 
   <script src="js/config.js"></script>
   <script src="js/core.js"></script>
   <script src="js/api.js"></script>
-  <script>MIS.startStatus();</script>
+  <script>
+    MIS.startStatus();
+
+    // Light / dark toggle. The choice is remembered on this device.
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById('theme-toggle');
+      var label = btn.querySelector('[data-theme-label]');
+      var meta = document.querySelector('meta[name="theme-color"]');
+      function render() {
+        var light = root.getAttribute('data-theme') === 'light';
+        label.textContent = light ? 'Dark' : 'Light';
+        btn.setAttribute('aria-label', 'Switch to ' + (light ? 'dark' : 'light') + ' mode');
+        meta.setAttribute('content', light ? '#ffffff' : '#000000');
+      }
+      btn.addEventListener('click', function () {
+        var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('mis.theme', next); } catch (e) {}
+        render();
+      });
+      render();
+    })();
+  </script>
 </body>
 </html>
