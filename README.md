@@ -1,149 +1,93 @@
-# MIS System (Membership Initiation System)
+# SPACE Registration Portal — static HTML / CSS / JS build
 
-<div align="center">
-  <img src="assets/readme/hero.svg" alt="MIS System banner" width="100%" />
-</div>
+A dependency-free rebuild of the React portal (`MIS_REGISTRATION-SYSTEM_[RS]/` on the `main` branch).
+This branch contains only the static build, with `index.html` at the repository root.
+No build step, no framework, no npm: open the files or serve the folder.
 
-<div align="center">
-  <a href="#"><img alt="Build" src="https://img.shields.io/badge/build-passing-22c55e?style=flat&logo=checkmarx&logoColor=white"></a>
-  <a href="#"><img alt="Backend" src="https://img.shields.io/badge/backend-FastAPI-2563eb?style=flat&logo=fastapi&logoColor=white"></a>
-  <a href="#"><img alt="Frontend" src="https://img.shields.io/badge/frontend-React%20%7C%20Vite-0ea5e9?style=flat&logo=react&logoColor=white"></a>
-  <a href="#"><img alt="Deploy" src="https://img.shields.io/badge/deploy-Docker-2496ED?style=flat&logo=docker&logoColor=white"></a>
-</div>
-
-<p align="center">
-  MIS System is a modular platform for secure identity, administrative oversight, and guided onboarding across web, mobile, and API clients.
-</p>
-
-## Overview
-
-MIS System brings three primary capabilities together:
-
-- Central authentication and authorization (JWT, roles, audit-friendly flows)
-- Administrative dashboard for invitations, member lifecycle, and operational visibility
-- Public registration portal for guided onboarding and validation
-
-## Contents
-
-- [Architecture](#architecture)
-- [Modules](#modules)
-- [Production Deployment](#production-deployment)
-- [Local Development](#local-development)
-- [Configuration](#configuration)
-- [Security](#security)
-- [Media & Licensing](#media--licensing)
-
-## Architecture
-
-<div align="center">
-  <img src="assets/readme/architecture.svg" alt="System architecture diagram showing clients routed through Nginx to Central Auth API and database" width="100%" />
-</div>
-
-GitHub also renders a live diagram below for quick scanning:
-
-```mermaid
-graph TD
-  User((User))
-  Admin((Admin))
-
-  subgraph "Frontend Layer"
-    RS[Registration Portal]
-    UI[Admin Dashboard]
-    Mobile[Mobile / SDK Clients]
-  end
-
-  subgraph "Gateway Layer"
-    Nginx[Nginx Reverse Proxy]
-  end
-
-  subgraph "Backend Layer"
-    API[Central Auth API]
-    DB[(Database)]
-  end
-
-  User --> RS
-  Admin --> UI
-  User --> Mobile
-
-  RS --> Nginx
-  UI --> Nginx
-  Mobile --> Nginx
-
-  Nginx --> API
-  API --> DB
-```
-
-## Modules
-
-| Module | Path | Purpose | Tech |
-| --- | --- | --- | --- |
-| Central Auth API | `MIS_SYSTEM-ENGINE_[SE]/central-auth-api/` | Authentication, JWT issuance, admin workflows | FastAPI |
-| Admin UI | `MIS_SYSTEM-ENGINE_[SE]/admin-ui/` | Admin dashboard and operational tools | React, Vite |
-| Registration Portal | `MIS_REGISTRATION-SYSTEM_[RS]/` | Public onboarding and registration flow | React, Vite |
-| Login System | `MIS_LOGIN-SYSTEM_[LS]/` | Client SDKs / mobile integrations | Client-side |
-
-## Production Deployment
-
-The production stack runs as a single compose project and includes:
-
-- `central-auth-api` (backend)
-- `admin-ui` (frontend)
-- `auth-nginx` (gateway)
-
-From the repository root:
+## Run it
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build
+python3 -m http.server 4173
 ```
 
-Endpoints (default):
+Then open <http://localhost:4173/>.
 
-| Service | URL | Notes |
+- **With the backend:** set `apiBaseUrl` in `js/config.js` (default `http://localhost:8000`) and make sure the
+  portal's origin is in the API's `ALLOWED_ORIGINS`.
+- **Without the backend (demo mode):** add `?demo=1` to any URL, e.g. <http://localhost:4173/?demo=1>.
+  The API is replaced by an in-browser mock for that tab. Invitation `SPC-DEMO01`, PIN `1234`.
+  The yellow bar lets you switch the system between open / closing soon / closed. `?demo=0` turns it off.
+
+Deploy by uploading this folder to any static host. `js/config.js` is the only per-environment file.
+
+## Structure
+
+```
+index.html        Landing: hero, features, how it works
+interest.html     Waitlist form (always on) + gated entry to registration
+invitation.html   Invitation code + PIN verification, starts the 3-hour session
+register.html     5 steps: personal, address, credentials, photos, oath & policies
+complete.html     Confirmation with the reference number
+css/styles.css    All styles (design tokens at the top)
+js/config.js      Environment configuration
+js/core.js        Storage, toasts, session timer, live status beacon, offline guard
+js/api.js         API client (fetch/XHR) and the demo mock
+js/<page>.js      One script per page
+assets/           SPACE emblem, Whytehoux logo, favicon
+```
+
+## Backend endpoints used
+
+| Method | Endpoint | Used for |
 | --- | --- | --- |
-| API (via gateway) | `http://localhost/` | Reverse-proxied by `auth-nginx` |
-| Admin UI | `http://localhost:3000/` | Admin portal |
-| API docs | `http://localhost/docs` | Swagger UI |
+| GET | `/api/system/status` (+ WS `/api/system/ws`) | Online / closing soon / offline beacon and guard |
+| POST | `/api/waitlist/submit` | Interest form |
+| POST | `/api/invitation/verify` | Invitation code + PIN |
+| GET | `/api/register/check-email`, `/check-username` | Availability checks |
+| POST | `/api/upload/photo`, `/api/upload/audio` | Photos and oath recording |
+| POST | `/api/register/` | Final submission |
 
-## Local Development
+## What changed from the React build
 
-Common workflows:
+Behaviour that was broken and is fixed here:
 
-- Registration Portal:
-  - `cd MIS_REGISTRATION-SYSTEM_[RS]`
-  - `npm install`
-  - `npm run dev`
-- Admin UI:
-  - `cd MIS_SYSTEM-ENGINE_[SE]/admin-ui`
-  - `npm install`
-  - `npm run dev`
-- Central Auth API:
-  - `cd MIS_SYSTEM-ENGINE_[SE]/central-auth-api`
-  - run via your Python environment (FastAPI)
+- **Step 1 could not be passed.** It validated username and password, which are only entered on step 3,
+  and those errors were never displayed. Each step now validates its own fields.
+- **Submission payload did not match the API schema.** It sent `bio`, `oath_recording_id` and
+  `photo_ids: []`; the backend expects `biography`, `audio_oath_id`, `photo_ids` as a comma-separated
+  string and `invitation_id`. Uploaded photo ids were never sent at all. All are now sent correctly.
+- **Password was written to `sessionStorage`** in plain text (twice). It is now never stored; after a
+  reload the applicant re-enters it.
+- **Session expiry was computed but never acted on.** The timer now warns at 15 and 5 minutes and, on
+  expiry, clears the data and returns to the invitation page.
+- **Progress bars never rendered** (runtime-built Tailwind classes such as `w-[${n}%]` are not generated).
+- **Reference number was invented client-side** and submission time changed on every refresh. The
+  reference now derives from the pending-user id returned by the API and the timestamp is stored once.
+- **Audio type was hard-coded to WebM**, which mislabels Safari recordings. The recorder's real type is used.
+- 422 validation errors from FastAPI (a list, not a string) are now shown as readable text.
 
-<div align="center">
-  <img src="assets/readme/ui-mock.svg" alt="UI preview mock showing dashboard layout and visual hierarchy" width="100%" />
-</div>
+UX and design changes:
 
-## Configuration
+- New SPACE emblem throughout; Whytehoux logo kept. One monochrome system (ink, paper, white, square
+  corners) with colour reserved for status and validation. The emerald/blue/purple glass section and the
+  hot-linked stock image are gone.
+- Landing page has real calls to action instead of a single corner arrow, a "how it works" section, and a
+  compact footer instead of an empty full-height one.
+- Oath and policies are step 5 of the same stepper instead of a surprise extra page.
+- Inline field errors, confirm-password, show/hide toggles, a strength meter based on more than length.
+- Photos: drag and drop, thumbnails that survive a refresh, remove buttons that work on touch.
+- Oath: live input level meter, minimum length, listen back before saving, clear "saved" state.
+- Review-your-details panel before submitting; the submit button explains what is still missing.
+- Interest form shows an inline confirmation and exposes the optional `role` field the API already accepts.
+- One shared status module (polling plus the WebSocket push) instead of three copies.
+- Works on phones: form rows collapse, stepper condenses, no horizontal scrolling.
 
-Key configuration is managed via environment variables and compose configuration:
+Deliberately left out:
 
-- Database: `DATABASE_URL` (SQLite or PostgreSQL)
-- Production flags: `PRODUCTION`, `DEBUG_MODE`
-- Frontend API base URL: `VITE_API_BASE_URL`
+- **"Check application status" button.** The old one called a stub that always answered "pending"; there
+  is no backend endpoint for it yet.
+- **Policy links.** They pointed at dead `#anchors`. Set real URLs in `policyLinks` in `js/config.js` and
+  they become links.
 
-Refer to `docker-compose.prod.yml` for the production wiring.
-
-## Security
-
-Security posture and engineering practices:
-
-- Password hashing with bcrypt
-- Token-based auth (JWT)
-- Input validation via strict schemas
-- Separation of concerns between gateway, API, and UIs
-
-## Media & Licensing
-
-- Images in `assets/readme/` are generated SVGs included in this repository.
-- Badge images are served by shields.io and are subject to their own terms.
+Fonts: headings use Graduate (Google Fonts, OFL). The Varcity font in the React build is licensed for
+personal use only.
