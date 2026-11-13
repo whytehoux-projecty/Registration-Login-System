@@ -250,7 +250,6 @@ textarea.input { resize: vertical; min-height: 110px; }
   animation: float 7s ease-in-out infinite;
 }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-.hero__tag { max-width: 34rem; color: #c9c9c9; font-size: clamp(1rem, 2.2vw, 1.2rem); }
 .hero__cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
 .hero__scroll {
   position: absolute; bottom: 1.25rem; left: 50%; transform: translateX(-50%);
