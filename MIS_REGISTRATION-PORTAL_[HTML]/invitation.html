@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify your invitation — SPACE</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Graduate&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="bar">
+    <a class="bar__brand" href="index.html" aria-label="SPACE — back to home">
+      <img src="assets/space-emblem.svg" alt="" width="44" height="44">
+    </a>
+    <div class="bar__right">
+      <div class="timer" data-timer hidden title="Time remaining to complete registration">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span data-timer-value>0:00:00</span>
+      </div>
+      <div class="beacon" data-beacon data-state="checking">
+        <span class="beacon__dot" aria-hidden="true"></span>
+        <span data-beacon-label>Checking…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell shell--narrow stack" style="--gap:1.25rem">
+    <div class="notice notice--warn" data-closing hidden>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <p data-closing-text></p>
+    </div>
+
+    <div class="notice notice--info" id="resume" hidden>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <div>
+        <strong>You already have a verified invitation</strong>
+        <p>Your registration session is still active in this tab.</p>
+        <a class="btn btn--sm" href="register.html" style="margin-top:.6rem">Resume registration</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="center" style="margin-bottom:1.75rem">
+        <h1 class="display card__title">Verify your invitation</h1>
+        <p class="muted small" style="margin-top:.5rem">Enter the code and PIN from your invitation email.</p>
+      </div>
+
+      <form id="invite-form" class="stack" style="--gap:1.25rem" novalidate>
+        <div class="field">
+          <label for="code">Invitation code</label>
+          <input class="input input--code" id="code" name="code" type="text" placeholder="INV-ABC123" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" required>
+          <p class="field__hint">Letters and numbers separated by a dash, e.g. XXX-XXXXXX</p>
+          <p class="field__error" data-error-for="code" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="pin">PIN</label>
+          <div class="input-group">
+            <input class="input input--pin" id="pin" name="pin" type="password" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="••••" autocomplete="off" required>
+            <button class="input-group__btn" type="button" data-toggle="pin" aria-pressed="false">Show</button>
+          </div>
+          <p class="field__error" data-error-for="pin" hidden></p>
+        </div>
+
+        <div>
+          <label class="check">
+            <input type="checkbox" name="terms">
+            <span>I agree to the <span data-policy="terms">Terms of Service</span> and <span data-policy="privacy">Privacy Policy</span></span>
+          </label>
+          <p class="field__error" data-error-for="terms" hidden></p>
+        </div>
+
+        <button class="btn btn--block" type="submit">Continue</button>
+      </form>
+    </div>
+
+    <p class="center"><a class="link-btn" href="interest.html">← No invitation yet? Request one</a></p>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/invitation.js"></script>
+</body>
+</html>

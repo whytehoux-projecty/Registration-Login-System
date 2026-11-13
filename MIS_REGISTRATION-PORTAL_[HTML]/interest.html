@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register your interest — SPACE</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Graduate&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="split">
+    <aside class="split__art" aria-hidden="true">
+      <img src="assets/space-emblem.svg" alt="" width="400" height="405">
+    </aside>
+
+    <div class="split__main">
+      <header class="bar">
+        <a class="bar__brand" href="index.html" aria-label="SPACE — back to home">
+          <img src="assets/space-emblem.svg" alt="" width="44" height="44">
+        </a>
+        <div class="bar__right">
+          <div class="beacon" data-beacon data-state="checking">
+            <span class="beacon__dot" aria-hidden="true"></span>
+            <span data-beacon-label>Checking…</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="split__content">
+        <div class="shell shell--narrow">
+          <div class="center" style="margin-bottom:1.75rem">
+            <h1 class="display" style="font-size:clamp(1.7rem,5vw,2.3rem)">Register your interest</h1>
+            <p class="muted" style="margin-top:.5rem">Be the first to explore the future.</p>
+          </div>
+
+          <!-- Waitlist form: always available, even when registration is offline -->
+          <form id="interest-form" class="stack" novalidate>
+            <div class="notice notice--info" data-offline-tip hidden>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <p>Registration is offline right now, but you can still request an invitation below.</p>
+            </div>
+
+            <div class="field">
+              <label for="fullName">Full name <span class="req" aria-hidden="true">*</span></label>
+              <input class="input" id="fullName" name="fullName" type="text" autocomplete="name" placeholder="John Doe" required>
+              <p class="field__error" data-error-for="fullName" hidden></p>
+            </div>
+            <div class="field">
+              <label for="email">Email address <span class="req" aria-hidden="true">*</span></label>
+              <input class="input" id="email" name="email" type="email" autocomplete="email" placeholder="john@example.com" required>
+              <p class="field__error" data-error-for="email" hidden></p>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="company">Company <span class="opt">(optional)</span></label>
+                <input class="input" id="company" name="company" type="text" autocomplete="organization" placeholder="Company Ltd.">
+              </div>
+              <div class="field">
+                <label for="role">Role <span class="opt">(optional)</span></label>
+                <input class="input" id="role" name="role" type="text" autocomplete="organization-title" placeholder="Your role">
+              </div>
+            </div>
+
+            <button class="btn btn--block" type="submit">
+              Request invitation
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </button>
+          </form>
+
+          <div id="interest-done" class="notice notice--ok" role="status" tabindex="-1" hidden>
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <div>
+              <strong>Request received</strong>
+              <p data-done-message></p>
+              <button class="link-btn" type="button" data-again style="margin-top:.4rem;color:inherit">Submit another request</button>
+            </div>
+          </div>
+
+          <div class="divider">Already invited?</div>
+
+          <!-- Registration entry: only when the system is online -->
+          <section class="stack" aria-labelledby="have-invite">
+            <p class="center muted small" id="have-invite">Enter your <strong style="color:var(--ink)">invitation code</strong> and PIN to complete registration.</p>
+
+            <div class="notice notice--danger" data-offline hidden>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <div><strong>Registration system offline</strong><p data-offline-message></p></div>
+            </div>
+
+            <div class="notice notice--warn" data-closing hidden>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <p data-closing-text></p>
+            </div>
+
+            <button class="btn btn--ghost btn--block" type="button" id="to-registration" disabled>Checking availability…</button>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/interest.js"></script>
+</body>
+</html>
